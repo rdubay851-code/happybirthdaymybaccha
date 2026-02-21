@@ -111,7 +111,23 @@ html,body{height:100%;overflow:hidden;color:white}
  margin-top:20px;padding:10px 25px;
  border:none;border-radius:25px;cursor:pointer;font-weight:bold;
 }
-
+#birthdayPopup{
+ position:fixed;
+ inset:0;
+ background:rgba(0,0,0,.85);
+ backdrop-filter:blur(8px);
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ z-index:99999;
+ opacity:0;
+ visibility:hidden;
+ transition:.5s;
+}
+#birthdayPopup.active{
+ opacity:1;
+ visibility:visible;
+}
 /* Header */
 header{
  position:fixed;top:0;width:100%;
@@ -158,7 +174,21 @@ footer{
  background:rgba(0,0,0,.6);
  text-align:center;padding:10px;
 }
+/* ================= FIREWORK ================= */
 
+.firework{
+ position:fixed;
+ width:6px;
+ height:6px;
+ border-radius:50%;
+ pointer-events:none;
+ animation:explode 1s ease-out forwards;
+}
+
+@keyframes explode{
+ 0%{transform:translate(0,0);opacity:1;}
+ 100%{transform:translate(var(--x),var(--y));opacity:0;}
+}
 input,button{
  padding:10px 15px;border:none;border-radius:20px;margin-top:15px
 }
@@ -169,6 +199,17 @@ button:disabled{opacity:.5}
 </head>
 
 <body>
+<div id="birthdayPopup">
+  <div class="popup-card">
+    <h2>🎉 Happy Birthday Deepika ❤️</h2>
+    <p>
+      The wait is over...  
+      22 February has begun.  
+      Tonight belongs to you ✨
+    </p>
+    <button onclick="closeBirthdayPopup()">Enter 💖</button>
+  </div>
+</div>
 
 <div id="intro"><h1>DEEPIKA ❤️</h1></div>
 <div class="bg lock-bg" id="bg"></div>
@@ -283,14 +324,10 @@ Back → Home
 </div>
 
 <script>
-const birthdayTime=new Date("2026-02-21T18:30:00Z");
-let party=false;
+// 22 Feb 2026 00:00:00 IST
 
-const bg=document.getElementById("bg");
-const pass=document.getElementById("pass");
-const unlockBtn=document.getElementById("unlockBtn");
 const mainHeader=document.getElementById("mainHeader");
-const countdown=document.getElementById("countdown");
+
 
 /* Floating hearts */
 setInterval(()=>{
@@ -341,29 +378,60 @@ pass.addEventListener("keypress",function(e){
  }
 });
 
-/* Countdown */
-function updateCountdown(){
- const diff=birthdayTime-new Date();
- if(diff<=600000 && diff>0){
-   countdown.style.display="block";
-   pass.disabled=true;
-   unlockBtn.disabled=true;
-   const m=Math.floor((diff%(1000*60*60))/(1000*60));
-   const s=Math.floor((diff%(1000*60))/1000);
-   countdown.innerHTML=`⏳ ${m}m ${s}s left (IST)`;
- } else {
-   countdown.style.display="none";
-   pass.disabled=false;
-   unlockBtn.disabled=false;
- }
- if(diff<=0 && !party){
-   bg.className="bg party-bg";
-   party=true;
- }
-}
-setInterval(updateCountdown,1000);
-updateCountdown();
+// 22 Feb 2026 00:00 IST
+const birthdayTime = new Date("2026-02-21T18:30:00Z");
 
+let party = false;
+
+// Wait until page fully loads
+window.onload = function(){
+
+  const bg = document.getElementById("bg");
+  const pass = document.getElementById("pass");
+  const unlockBtn = document.getElementById("unlockBtn");
+  const countdown = document.getElementById("countdown");
+
+  function updateCountdown(){
+
+    const now = new Date();
+    const diff = birthdayTime.getTime() - now.getTime();
+
+    if(diff > 0){
+
+      // LOCK SITE
+      pass.disabled = true;
+      unlockBtn.disabled = true;
+
+      countdown.style.display = "block";
+
+      const hours = Math.floor(diff / (1000*60*60));
+      const minutes = Math.floor((diff % (1000*60*60)) / (1000*60));
+      const seconds = Math.floor((diff % (1000*60)) / 1000);
+
+      countdown.innerHTML =
+        `⏳ ${hours}h ${minutes}m ${seconds}s left (IST)`;
+
+    } else {
+
+      // UNLOCK SITE
+      pass.disabled = false;
+      unlockBtn.disabled = false;
+
+      countdown.innerHTML = "🎉 IT'S HER BIRTHDAY 🎉";
+
+      if(!party){
+        party = true;
+        bg.className = "bg party-bg";
+        showBirthdayPopup();
+        launchFireworks();
+      }
+    }
+  }
+
+  updateCountdown();
+  setInterval(updateCountdown,1000);
+
+};
 /* Confession popup */
 function showConfession(){
  document.getElementById("confession").classList.add("active");
@@ -433,7 +501,15 @@ function closeConfession(){
       clearInterval(raise);
     }
   },100);
+function showBirthdayPopup(){
+ document.getElementById("birthdayPopup").classList.add("active");
+}
+
+function closeBirthdayPopup(){
+ document.getElementById("birthdayPopup").classList.remove("active");
+}
 }</script>
 
 </body>
 </html> 
+
